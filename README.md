@@ -38,7 +38,7 @@ The draft model runs 4 lightweight decoder layers with Q-only attention, sharing
 ### Prerequisites
 
 - **Docker** with NVIDIA Container Toolkit (`nvidia-ctk` completed)
-- **NVIDIA GPU** with ≥22 GB VRAM (for 256k context at `gpu-memory-utilization 0.7`)
+- **NVIDIA GPU** (tested on a **DGX Spark** — GB10 GPU with 128 GB unified memory)
 - **Hugging Face token** with access to both gated models:
   - https://huggingface.co/nvidia/Gemma-4-31B-IT-NVFP4
   - https://huggingface.co/google/gemma-4-31B-it-assistant
@@ -160,33 +160,47 @@ Multi-Token Prediction generates 4 draft tokens per step using the lightweight a
 
 ## Concurrency & Performance
 
+*Tested on an NVIDIA DGX Spark (GB10 GPU, 128 GB unified memory).*
+
 ### Limits
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `--max-num-seqs` | `8` | Hard cap on concurrent sequences |
+| `--max-num-seqs` | `2` | Hard cap on concurrent sequences |
 | `--max-num-batched-tokens` | `8192` | Total tokens across all sequences in a single batch |
-| `--gpu-memory-utilization` | `0.70` | VRAM budget (~22 GB on a 32 GB GPU) |
+| `--gpu-memory-utilization` | `0.70` | vLLM memory budget |
+
+### KV cache at 0.70 gpu-memory-utilization
+
+| Metric | Value |
+|--------|-------|
+| Available KV cache memory | **27.96 GiB** |
+| Total KV cache capacity | **542,037 tokens** |
+| Max concurrency (262k ctx each) | **2.07×** |
 
 ### Realistic throughput
 
 | Workload | Typical concurrent requests |
 |----------|---------------------------|
-| Short queries (≤1K tokens each) | **8** (hits `max-num-seqs` cap) |
-| Coding / tool calling (500–2K tokens) | **4–8** |
-| Long context (32K+ tokens each) | **1–3** (VRAM-bound) |
-
-The `max-num-batched-tokens` of 8192 is the practical bottleneck for short concurrent requests. If 8 users each send a 2K-token prompt, the total (16K) exceeds the batch budget — vLLM drains and refills dynamically.
+| Short queries (≤1K tokens each) | **2** (hits `max-num-seqs` cap) |
+| Coding / tool calling (500–2K tokens) | **2** |
+| Long context (32K+ tokens each) | **1–2** |
 
 ### Tuning for higher concurrency
 
-To increase throughput at the cost of higher VRAM usage:
+The `--gpu-memory-utilization` of `0.70` leaves headroom. You can increase concurrency by raising it — more KV cache blocks fit, which allows more concurrent sequences at the cost of less free GPU memory:
+
+| `gpu-mem-util` | Approx. KV cache capacity | Est. max concurrency (262k ctx) |
+|:--------------:|:-------------------------:|:-------------------------------:|
+| 0.70 | 542K tokens | **2×** |
+| 0.85 | ~740K tokens | **~2.8×** |
+| 0.95 | ~870K tokens | **~3.3×** |
 
 ```bash
-# In start.sh, increase these values:
---max-num-seqs 16
+# In start.sh, for more concurrency:
+--gpu-memory-utilization 0.95
+--max-num-seqs 4
 --max-num-batched-tokens 16384
---gpu-memory-utilization 0.85
 ```
 
 Monitor with `nvidia-smi` to ensure you don't OOM.

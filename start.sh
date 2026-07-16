@@ -155,7 +155,7 @@ docker run -d \
     --chat-template /workspace/chat_template.jinja \
     --gpu-memory-utilization 0.70 \
     --max-model-len 262144 \
-    --max-num-seqs 8 \
+    --max-num-seqs 2 \
     --max-num-batched-tokens 8192 \
     --kv-cache-dtype fp8 \
     --enable-chunked-prefill \
