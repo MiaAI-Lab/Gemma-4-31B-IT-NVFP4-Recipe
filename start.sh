@@ -165,7 +165,7 @@ docker run -d \
     --allowed-media-domains '*' \
     --speculative-config "${SPECULATIVE_CONFIG}" \
     --load-format fastsafetensors \
-    --limit-mm-per-prompt '{"image": 4, "audio": 1}' \
+    --limit-mm-per-prompt '{"image": 4, "video": 1, "audio": 1}' \
     --reasoning-parser gemma4 \
     --override-generation-config '{"temperature":1.0,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0,"repetition_penalty":1.0}' \
   --default-chat-template-kwargs '{"enable_thinking":true}' \

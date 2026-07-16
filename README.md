@@ -11,15 +11,6 @@ Serve **Google Gemma 4 31B IT** in 4-bit NVFP4 quantization via vLLM with an Ope
 
 Automatically downloads and caches both models from Hugging Face — just set your token and run.
 
-<p>
-<a href="https://x.com/MiaAI_lab" target="_blank">
-  <img src="https://img.shields.io/badge/Follow%20me%20on%20X-000000?style=for-the-badge&logo=x&logoColor=white" alt="Follow Mia on X" />
-</a>
-</p>
-<p>
-<a href='https://ko-fi.com/Z8Z3SPLOD' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-</p>
-
 ---
 
 ## Models
@@ -113,10 +104,11 @@ curl http://localhost:8888/v1/chat/completions \
   }'
 ```
 
-### 🖼️ Multi-modal
+### 🖼️ Multi-modal (Image + Video)
 
-The model supports images and audio. Pass content parts in your messages:
+The model supports images and video through a shared vision encoder. Audio has a token ID defined but the NVFP4 quantized weights do not include an audio encoder (`audio_config: null`).
 
+**Image example:**
 ```json
 {
   "messages": [
@@ -130,6 +122,23 @@ The model supports images and audio. Pass content parts in your messages:
   ]
 }
 ```
+
+**Video example:**
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {"type": "video_url", "video_url": {"url": "https://example.com/video.mp4"}},
+        {"type": "text", "text": "Summarize this video"}
+      ]
+    }
+  ]
+}
+```
+
+Limits: up to **4 images** or **1 video** (or **1 audio** if supported) per prompt.
 
 ### ⚡ MTP Speculative Decoding
 
@@ -194,6 +203,7 @@ Monitor with `nvidia-smi` to ensure you don't OOM.
 | `--gpu-memory-utilization` | `0.70` | Tune to your VRAM budget |
 | `--max-model-len` | `262144` | 256k context window |
 | `--kv-cache-dtype` | `fp8` | Reduces KV cache memory by ~50% |
+| `--limit-mm-per-prompt` | `{"image":4,"video":1,"audio":1}` | Max images, video, or audio per request |
 | `--chat-template` | `./chat_template.jinja` | Gemma 4 canonical template |
 | `--reasoning-parser` | `gemma4` | Parses thinking blocks |
 | `--tool-call-parser` | `gemma4` | Native tool call format |
