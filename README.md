@@ -11,6 +11,15 @@ Serve **Google Gemma 4 31B IT** in 4-bit NVFP4 quantization via vLLM with an Ope
 
 Automatically downloads and caches both models from Hugging Face — just set your token and run.
 
+<p>
+<a href="https://x.com/MiaAI_lab" target="_blank">
+  <img src="https://img.shields.io/badge/Follow%20me%20on%20X-000000?style=for-the-badge&logo=x&logoColor=white" alt="Follow Mia on X" />
+</a>
+</p>
+<p>
+<a href='https://ko-fi.com/Z8Z3SPLOD' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+</p>
+
 ---
 
 ## Models
