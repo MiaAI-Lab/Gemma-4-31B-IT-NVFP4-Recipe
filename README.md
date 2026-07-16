@@ -158,6 +158,40 @@ Multi-Token Prediction generates 4 draft tokens per step using the lightweight a
 
 ---
 
+## Recommended Client Settings
+
+### Sampling parameters
+
+| Setting | Coding & Tools | Chat / Creative | Tool Benchmarks |
+|---------|:-------------:|:---------------:|:---------------:|
+| `temperature` | **0.1 – 0.2** | **0.7 – 1.0** | **0.0** |
+| `top_p` | 0.9 | 0.95 | 1.0 |
+| `top_k` | 20 | 20 | — |
+| `max_tokens` | 8192 | 4096 | 4096 |
+| `presence_penalty` | 0.0 | 0.0 | 0.0 |
+| `repetition_penalty` | 1.0 | 1.0 | 1.0 |
+
+### Thinking
+
+| Use case | `enable_thinking` | Reason |
+|----------|:-----------------:|--------|
+| Complex coding / debugging | `true` | Model reasons through the problem before answering |
+| Simple code gen / tool calling | `false` | Faster, no overhead from reasoning tokens |
+| Chat / creative writing | `true` | More thoughtful responses |
+| Tool benchmarks | `false` | Clean output, no interference with eval parsers |
+
+Pass per-request via:
+```json
+{
+  "temperature": 0.1,
+  "chat_template_kwargs": {"enable_thinking": true}
+}
+```
+
+Or bake defaults into `start.sh` by editing `--override-generation-config` and `--default-chat-template-kwargs`.
+
+---
+
 ## Concurrency & Performance
 
 *Tested on an NVIDIA DGX Spark (GB10 GPU, 128 GB unified memory).*
