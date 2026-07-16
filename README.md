@@ -140,6 +140,41 @@ Multi-Token Prediction generates 4 draft tokens per step using the lightweight a
 
 ---
 
+## Concurrency & Performance
+
+### Limits
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `--max-num-seqs` | `8` | Hard cap on concurrent sequences |
+| `--max-num-batched-tokens` | `8192` | Total tokens across all sequences in a single batch |
+| `--gpu-memory-utilization` | `0.70` | VRAM budget (~22 GB on a 32 GB GPU) |
+
+### Realistic throughput
+
+| Workload | Typical concurrent requests |
+|----------|---------------------------|
+| Short queries (≤1K tokens each) | **8** (hits `max-num-seqs` cap) |
+| Coding / tool calling (500–2K tokens) | **4–8** |
+| Long context (32K+ tokens each) | **1–3** (VRAM-bound) |
+
+The `max-num-batched-tokens` of 8192 is the practical bottleneck for short concurrent requests. If 8 users each send a 2K-token prompt, the total (16K) exceeds the batch budget — vLLM drains and refills dynamically.
+
+### Tuning for higher concurrency
+
+To increase throughput at the cost of higher VRAM usage:
+
+```bash
+# In start.sh, increase these values:
+--max-num-seqs 16
+--max-num-batched-tokens 16384
+--gpu-memory-utilization 0.85
+```
+
+Monitor with `nvidia-smi` to ensure you don't OOM.
+
+---
+
 ## Configuration
 
 ### Environment variables
